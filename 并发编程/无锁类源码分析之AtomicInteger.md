@@ -1,0 +1,519 @@
+# 无锁类源码分析之AtomicInteger
+
+在并发基础中写到并发级别非阻塞和阻塞，那非阻塞也分三个级别，无障碍，无锁，无等待。
+
+[并发基础链接](https://blog.csdn.net/qq_37933685/article/details/80850429)
+
+## 环境：jdk1.8   IntelliJ IDEA2017
+
+## 无锁类的原理详解
+
+1.1.CAS
+CAS算法的过程是这样：它包含3个参数CAS(V,E,N)。V表示要更新的变量，E表示预期值，N表示新值。仅当V
+值等于E值时，才会将V的值设为N，如果V值和E值不同，则说明已经有其他线程做了更新，则当前线程什么
+都不做。最后，CAS返回当前V的真实值。CAS操作是抱着乐观的态度进行的，它总是认为自己可以成功完成
+操作。当多个线程同时使用CAS操作一个变量时，只有一个会胜出，并成功更新，其余均会失败。失败的线程
+不会被挂起，仅是被告知失败，并且允许再次尝试，当然也允许失败的线程放弃操作。基于这样的原理，CAS
+操作即时没有锁，也可以发现其他线程对当前线程的干扰，并进行恰当的处理。
+
+## 无锁类之AtomicInteger
+
+1. AtomicInteger
+
+   概述
+
+   - ```
+     public class AtomicInteger
+     extends Number
+     implements Serializable
+     ```
+
+     一个`int`可能原子更新的值。 一个`AtomicInteger`用于诸如原子增量计数器的应用程序中，不能用作`Integer`的[替代品](../../../../java/lang/Integer.html) 。  但是，这个类确实扩展了`Number`以允许通过处理基于数字类的工具和实用程序的统一访问。 
+
+     AtomicInteger的类方法如下所示：
+
+     ![1530354883447](C:\Users\13441\Desktop\md\并发编程\无锁分析.assets\1530354883447.png)
+
+## 注意：这里我贴上AtomicInteger的源码，解析都写在下方源码里面
+
+```
+package java.util.concurrent.atomic;
+import java.util.function.IntUnaryOperator;
+import java.util.function.IntBinaryOperator;
+import sun.misc.Unsafe;
+
+
+public class AtomicInteger extends Number implements java.io.Serializable {
+    private static final long serialVersionUID = 6214790243416807050L;
+
+    // 設置為使用Unsafe.compareAndSwapInt進行更新
+    private static final Unsafe unsafe = Unsafe.getUnsafe();
+    private static final long valueOffset;//value值偏移量
+
+
+
+
+	/**
+     * Unsafe类是用来在任意内存地址位置处读写数据，可见，对于普通用户来说，使用起来还是比较危险的。
+     * public native long objectFieldOffset(Field var1);方法用于获取某个字段相对Java对象的“起始地址”的偏移量，方法返回值和参数如下
+     * AtomicInteger.class.getDeclaredField("value")是拿到atomicInteger的value字段的field对象
+     * valueoffset是拿到value的相对于AtomicInteger对象的地址偏移量
+     * 
+     */
+    static {
+        try {
+            valueOffset = unsafe.objectFieldOffset
+                (AtomicInteger.class.getDeclaredField("value"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+
+
+
+	/*
+	*这里的int value就是atomicInteger 的值下面的操作都是围绕value展开
+	*/
+    private volatile int value;
+
+    /**构造方法
+     * 使用給定的初始值創建新的AtomicInteger。即value = initialValue;
+     *
+     * @param 传入初始值
+     */
+    public AtomicInteger(int initialValue) {
+        value = initialValue;
+    }
+
+
+
+
+    /**
+     * 創建一個初始值為0的新AtomicInteger实例。即value=0;
+     */
+    public AtomicInteger() {
+    }
+
+
+
+
+
+    /**
+     * 獲取當前值。
+     *
+     * @return 當前的價值
+     */
+    public final int get() {
+        return value;
+    }
+
+
+
+
+    /**
+     * 設置為給定值。
+     *
+     * @param newValue 新值
+     */
+    public final void set(int newValue) {
+        value = newValue;
+    }
+
+
+
+
+    /**
+     * 最終設置為給定值。
+     *
+     * @param newValue the new value
+     * @since 1.6
+     */
+    public final void lazySet(int newValue) {
+        unsafe.putOrderedInt(this, valueOffset, newValue);
+    }
+    /**
+     * 这里抛出一个疑问？到底set（）和lazySet（）有什么区别？
+     * 1.首先set()是对volatile变量的一个写操作, 我们知道volatile的write
+     * 为了保证对其他线程的可见性会追加以下两个Fence(内存屏障)如下：
+     *   1.StoreStore 在intel cpu 不存在[写写]重排序
+     *   2.StoreLoad 这个是所有内存屏障里最耗性能的内存屏障相关参考Doug Lea大大的cookbook (http://g.oswego.edu/dl/jmm/cookbook.html)
+     * Doug Lea大大又说了, lazySet()省去了StoreLoad屏障, 只留下StoreStore
+     * 总结：set()和volatile具有一样的效果(能够保证内存可见性，能够避免指令重排序)，
+     * 但是使用lazySet不能保证其他线程能立刻看到修改后的值(有可能发生指令重排序)。
+     * 简单点理解：lazySet比set()具有性能优势，但是使用场景很有限。
+     * 在网上没有找到lazySet和set的性能数据对比，
+     * 而且CPU的速度很快的，应用的瓶颈往往不在CPU，
+     * 而是在IO、网络、数据库等。对于并发程序要优先保证正确性，
+     * 然后出现性能瓶颈的时候再去解决。因为定位并发导致的问题，往往要比定位性能问题困难很多。
+     */
+    
+
+
+    /**
+     * 原子级设置为给定值并返回旧值。
+     *
+     * @param newValue 新值
+     * @return 之前的值
+     */
+    public final int getAndSet(int newValue) {
+        return unsafe.getAndSetInt(this, valueOffset, newValue);
+    }
+    /**
+     * unsafe.getAndSetInt(this, valueOffset, newValue);的方法代码如下
+     * public final int getAndSetInt(Object var1, long var2, int var4) {
+        int var5;
+        do {
+            var5 = this.getIntVolatile(var1, var2);//getIntVolatile方法获取对象中offset偏移地址对应的整型field的值,支持volatile load语义。
+        } while(!this.compareAndSwapInt(var1, var2, var5, var4));//var1 是传进来的对象，long var2 是字段偏移值，int var5 是旧值，var4 是新值，var1和var2相当于当前内存的值当内存的值与旧值相等时，函数才能返回true，cas算法实现这个无锁操作
+
+        return var5;//var5 是传进来的旧值，所以上面的函数说设置定值并返回旧值
+    }
+     */
+    
+
+
+
+    /**
+     * 以原子方式将值设置为给定的更新值
+     * 如果当前值@code ==的预期值。
+     *
+     * @param expect 预期值
+     * @param update 新值
+     * @return 成功返回true 返回false表明实际值不等于预期值，设置失败
+     */
+    public final boolean compareAndSet(int expect, int update) {
+        return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
+    }
+
+    /**
+     * 以原子方式将值设置为给定的更新值
+     * 如果当前值@code ==的预期值。
+     *
+     * <p><a href="package-summary.html#weakCompareAndSet"可能会失败
+     * 虚假并且不提供订购保证</a>, 也是
+     * 很少是一个合适的替代品 {@code compareAndSet}.
+     * 该方法可能可能虚假的失败并且不会提供一个排序的保证，所以它在极少的情况下用于代替compareAndSet方法。
+     *
+     * @param expect 期望值
+     * @param update 新值
+     * @return {@code true} if successful
+     */
+    public final boolean weakCompareAndSet(int expect, int update) {
+        return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
+    }
+    /**
+     * 一个巨大的问题：weakCompareAndSet 和 compareAndSet 之间有什么区别？
+     * 看源码的doc是这样子解释的： 该方法可能可能虚假的失败并且不会提供一个排序的保证，所以它在极少的情况下用于代替compareAndSet方法。
+     * 从jdk 8 的官方文档的java.util.concurrent.atomic上找到这么二段话
+     * （原文）The atomic classes also support method weakCompareAndSet, which has limited applicability. 
+     * On some platforms, the weak version may be more efficient than compareAndSet in the normal case, but differs in that any given invocation of the weakCompareAndSet method may return false spuriously (that is, for no apparent reason). 
+     * A false return means only that the operation may be retried if desired, relying on the guarantee that repeated invocation when the variable holds expectedValue and no other thread is also attempting to set the variable will eventually succeed.
+     *  (Such spurious failures may for example be due to memory contention effects that are unrelated to whether the expected and current values are equal.) Additionally weakCompareAndSet does not provide ordering guarantees that are usually needed for synchronization control. 
+     *  However, the method may be useful for updating counters and statistics when such updates are unrelated to the other happens-before orderings of a program. When a thread sees an update to an atomic variable caused by a weakCompareAndSet, it does not necessarily see updates to any other variables that occurred before the weakCompareAndSet. 
+     *  This may be acceptable when, for example, updating performance statistics, but rarely otherwise.
+     *  （译文）一个原子类也支持weakCompareAndSet方法，该方法有适用性的限制。在一些平台上，在正常情况下weak版本比compareAndSet更高效，但是不同的是任何给定的weakCompareAndSet方法的调用都可能会返回一个虚假的失败( 无任何明显的原因 )。一个失败的返回意味着，操作将会重新执行如果需要的话，重复操作依赖的保证是当变量持有expectedValue的值并且没有其他的线程也尝试设置这个值将最终操作成功。( 一个虚假的失败可能是由于内存冲突的影响，而和预期值(expectedValue)和当前的值是否相等无关 )。此外weakCompareAndSet并不会提供排序的保证，即通常需要用于同步控制的排序保证。然而，这个方法可能在修改计数器或者统计，这种修改无关于其他happens-before的程序中非常有用。当一个线程看到一个通过weakCompareAndSet修改的原子变量时，它不被要求看到其他变量的修改，即便该变量的修改在weakCompareAndSet操作之前。
+     *  （原文）weakCompareAndSet atomically reads and conditionally writes a variable but does not create any happens-before orderings, so provides no guarantees with respect to previous or subsequent reads and writes of any variables other than the target of the weakCompareAndSet.
+     *  （译文）weakCompareAndSet实现了一个变量原子的读操作和有条件的原子写操作，但是它不会创建任何happen-before排序，所以该方法不提供对weakCompareAndSet操作的目标变量以外的变量的在之前或在之后的读或写操作的保证。
+     *  
+     */
+
+
+
+
+    /**
+     * 原子上增加一个当前值。
+     *
+     * @return 之前的值
+     */
+    public final int getAndIncrement() {
+        return unsafe.getAndAddInt(this, valueOffset, 1);
+    }
+    /**getAndAddInt函数的方法体，传进来的var4是1，每调用一次增加1.compareAndSwapInt前面解释过了
+     *public final int getAndAddInt(Object var1, long var2, int var4) {
+        int var5;
+        do {
+            var5 = this.getIntVolatile(var1, var2);
+        } while(!this.compareAndSwapInt(var1, var2, var5, var5 + var4));
+
+        return var5;
+    }
+ 
+     */
+
+    /**
+     * 原子地将当前值减1。
+     *
+     * @return 之前的值
+     */
+    public final int getAndDecrement() {
+        return unsafe.getAndAddInt(this, valueOffset, -1);
+    }
+    //和上面一样，传进去的var4是-1，所以每次调用减1
+
+    /**
+     * 原子上将给定值添加到当前值。
+     *
+     * @param delta 添加值
+     * @return 旧值
+     */
+    public final int getAndAdd(int delta) {
+        return unsafe.getAndAddInt(this, valueOffset, delta);
+    }
+    //和上面一样，但是这里传进去的var4是delta而已
+
+
+
+
+    /**
+     * 原子上当前值加1。
+     *
+     * @return 新值
+     */
+    public final int incrementAndGet() {
+        return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
+    }
+    //前面说getAndAddInt返回的是之前的值，调用这个函数把这个值+1，返回+1前的值之后+1,就等于现在的值
+
+
+    /**
+     * 原子地将当前值减1。
+     *
+     * @return 新值
+     */
+    public final int decrementAndGet() {
+        return unsafe.getAndAddInt(this, valueOffset, -1) - 1;
+    }
+    //还是一样。换成-1.变成减而已
+
+
+
+    /**
+     * 原子上将给定值添加到当前值。
+     *
+     * @param delta 添加值
+     * @return 新值
+     */
+    public final int addAndGet(int delta) {
+        return unsafe.getAndAddInt(this, valueOffset, delta) + delta;
+    }
+    //还是一样。换成delta值
+
+
+
+
+    /**
+     * 用应用给定函数的结果原子地更新当前值，返回以前的值。 该函数应该是无副作用的，因为当尝试的更新由于线程之间的争用而失败时，它可能会被重新应用。
+     *
+     * @param updateFunction 无副作用的功能
+     * @return 旧值
+     * @since 1.8新特性诶
+     */
+    public final int getAndUpdate(IntUnaryOperator updateFunction) {
+        int prev, next;
+        do {
+            prev = get();
+            next = updateFunction.applyAsInt(prev);
+        } while (!compareAndSet(prev, next));
+        return prev;
+    }
+    /**
+     * updateFunction.applyAsInt(prev);中使用了函数式编程
+     * 通过函数式编程，可以灵活的实现更加复杂的原子操作。
+     * # 清单5 IntUnaryOperator接口
+            int applyAsInt(int operand);
+
+            default IntUnaryOperator compose(IntUnaryOperator before) {
+                Objects.requireNonNull(before);
+                return (int v) -> applyAsInt(before.applyAsInt(v));
+            }
+
+            default IntUnaryOperator andThen(IntUnaryOperator after) {
+                Objects.requireNonNull(after);
+                return (int t) -> after.applyAsInt(applyAsInt(t));
+            }
+        该接口定义了一个待实现方法和两个默认方法，通过compose和andThen即可实现多个IntUnaryOperator的组合调用。
+     */
+    
+
+
+
+    /**
+     *用应用给定函数的结果原子地更新当前值，返回以前的值。 该函数应该是无副作用的，因为当尝试的更新由于线程之间的争用而失败时，它可能会被重新应用。
+     *
+     * @param updateFunction a side-effect-free function
+     * @return the updated value
+     * @since 1.8
+     */
+    public final int updateAndGet(IntUnaryOperator updateFunction) {
+        int prev, next;
+        do {
+            prev = get();
+            next = updateFunction.applyAsInt(prev);
+        } while (!compareAndSet(prev, next));
+        return next;
+    }
+    /**
+     * 老问题，updateandget和getandupdate的区别
+     * 看return GetAndUpdate返回旧值，updateAndGet返回新值，
+     */
+
+
+
+
+    /**
+     * Atomically updates the current value with the results of
+     * applying the given function to the current and given values,
+     * returning the previous value. The function should be
+     * side-effect-free, since it may be re-applied when attempted
+     * updates fail due to contention among threads.  The function
+     * is applied with the current value as its first argument,
+     * and the given update as the second argument.
+     *
+     * @param x the update value
+     * @param accumulatorFunction a side-effect-free function of two arguments
+     * @return the previous value
+     * @since 1.8
+     */
+    public final int getAndAccumulate(int x,
+                                      IntBinaryOperator accumulatorFunction) {
+        int prev, next;
+        do {
+            prev = get();
+            next = accumulatorFunction.applyAsInt(prev, x);
+        } while (!compareAndSet(prev, next));
+        return prev;
+    }
+
+    /**
+     * 将给定函数应用于当前值和给定值的结果以原始方式更新当前值，并返回以前的值。 该函数应该是无副作用的，因为当尝试的更新由于线程之间的争用而失败时，它可能会被重新应用。 该函数以当前值作为第一个参数，给定更新作为第二个参数应用。
+     *
+     * @param x the update value
+     * @param accumulatorFunction a side-effect-free function of two arguments
+     * @return the updated value
+     * @since 1.8
+     */
+    public final int accumulateAndGet(int x,
+                                      IntBinaryOperator accumulatorFunction) {
+        int prev, next;
+        do {
+            prev = get();
+            next = accumulatorFunction.applyAsInt(prev, x);
+        } while (!compareAndSet(prev, next));
+        return next;
+    }
+
+
+
+    //下面的这些没什么好说的get（） set（）之类的
+
+    /**
+     * Returns the String representation of the current value.
+     * @return the String representation of the current value
+     */
+    public String toString() {
+        return Integer.toString(get());
+    }
+
+    /**
+     * Returns the value of this {@code AtomicInteger} as an {@code int}.
+     */
+    public int intValue() {
+        return get();
+    }
+
+    /**
+     * Returns the value of this {@code AtomicInteger} as a {@code long}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    public long longValue() {
+        return (long)get();
+    }
+
+    /**
+     * Returns the value of this {@code AtomicInteger} as a {@code float}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    public float floatValue() {
+        return (float)get();
+    }
+
+    /**
+     * Returns the value of this {@code AtomicInteger} as a {@code double}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    public double doubleValue() {
+        return (double)get();
+    }
+
+}
+
+```
+
+
+
+
+## java native 方法怎么实现
+
+### 什么是Native Method    
+
+简单地讲，一个Native Method就是一个java调用非java代码的接口。一个Native Method是这样一个java的方法：该方法的实现由非java语言实现，比如C。这个特征并非java所特有，很多其它的编程语言都有这一机制，比如在C＋＋中，你可以用extern "C"告知C＋＋编译器去调用一个C的函数。    "A native method is a Java method whose implementation is provided by non-java code."    在定义一个native method时，并不提供实现体（有些像定义一个java interface），因为其实现体是由非java语言在外面实现的。 
+
+### native标识符意义
+
+标识符native可以与所有其它的java标识符连用，但是abstract除外。这是合理的，因为native暗示这些方法是有实现体的，只不过这些实现体是非java的，但是abstract却显然的指明这些方法无实现体。native与其它java标识符连用时，其意义同非Native Method并无差别，比如native static表明这个方法可以在不产生类的实例时直接调用，这非常方便，比如当你想用一个native method去调用一个C的类库时。上面的第三个方法用到了native synchronized，JVM在进入这个方法的实现体之前会执行同步锁机制（就像java的多线程。） 
+
+### native的特性
+
+一个native method方法可以返回任何java类型，包括非基本类型，而且同样可以进行异常控制。 
+
+当一个native method接收到一些非基本类型时如Object或一个整型数组时，这个方法可以访问这非些基本型的内部，但是这将使这个native方法依赖于你所访问的java类的实现。
+
+有一点要牢牢记住：我们可以在一个native method的本地实现中访问所有的java特性，但是这要依赖于你所访问的java特性的实现，而且这样做远远不如在java语言中使用那些特性方便和容易。 
+
+native method的存在并不会对其他类调用这些本地方法产生任何影响，实际上调用这些方法的其他类甚至不知道它所调用的是一个本地方法。 
+
+JVM将控制调用本地方法的所有细节
+
+ 如果一个含有本地方法的类被继承，子类会继承这个本地方法并且可以用java语言重写这个方法（这个似乎看起来有些奇怪），同样的如果一个本地方法被fianl标识，它被继承后不能被重写。  
+
+本地方法非常有用，因为它有效地扩充了jvm.事实上，我们所写的java代码已经用到了本地方法，在sun的java的并发（多线程）的机制实现中，许多与操作系统的接触点都用到了本地方法，这使得java程序能够超越java运行时的界限。有了本地方法，java程序可以做任何应用层次的任务。 
+
+## 为什么要使用Native Method 
+
+### 1.与java环境外交互：
+
+​		有时java应用需要与java外面的环境交互。这是本地方法存在的主要原因，你可以想想java需要与一些底层系统如操作系统或某些硬件交换信息时的情况。本地方法正是这样一种交流机制：它为我们提供了一个非常简洁的接口，而且我们无需去了解java应用之外的繁琐的细节。
+
+### 2.与操作系统交互：    
+
+JVM支持着java语言本身和运行时库，它是java程序赖以生存的平台，它由一个解释器（解释字节码）和一些连接到本地代码的库组成。然而不管怎 样，它毕竟不是一个完整的系统，它经常依赖于一些底层（underneath在下面的）系统的支持。这些底层系统常常是强大的操作系统。通过使用本地方法，我们得以用java实现了jre的与底层系统的交互，甚至JVM的一些部分就是用C写的，还有，如果我们要使用一些java语言本身没有提供封装的操作系统的特性时，我们也需要使用本地方法。 
+
+### 3.Sun's Java     
+
+Sun的解释器是用C实现的，这使得它能像一些普通的C一样与外部交互。jre大部分是用java实现的，它也通过一些本地方法与外界交互。例如：类java.lang.Thread 的 setPriority()方法是用java实现的，但是它实现调用的是该类里的本地方法setPriority0()。这个本地方法是用C实现的，并被植入JVM内部，在Windows 95的平台上，这个本地方法最终将调用Win32 SetPriority() API。这是一个本地方法的具体实现由JVM直接提供，更多的情况是本地方法由外部的动态链接库（external dynamic link library）提供，然后被JVM调用。 
+
+## JVM怎样使Native Method跑起来： 
+
+我们知道，当一个类第一次被使用到时，这个类的字节码会被加载到内存，并且只会回载一次。在这个被加载的字节码的入口维持着一个该类所有方法描述符的list，这些方法描述符包含这样一些信息：方法代码存于何处，它有哪些参数，方法的描述符（public之类）等等。     如果一个方法描述符内有native，这个描述符块将有一个指向该方法的实现的指针。这些实现在一些DLL文件内，但是它们会被操作系统加载到java程序的地址空间。当一个带有本地方法的类被加载时，其相关的DLL并未被加载，因此指向方法实现的指针并不会被设置。当本地方法被调用之前，这些DLL才会被加载，这是通过调用java.system.loadLibrary()实现的。 
+
+## 参考文献：
+
+https://blog.csdn.net/wike163/article/details/6635321
+
+http://cmsblogs.com/?p=2235
+
+http://www.blogjava.net/mstar/archive/2013/04/24/398351.html
+
+http://ifeve.com/juc-atomic-class-lazyset-que/
+
+https://www.jianshu.com/p/33998c5c0247
+
+https://blog.csdn.net/qfycc92/article/details/46489553
+
+[对 volatile、compareAndSet、weakCompareAndSet 的一些思考](http://www.importnew.com/27596.html)
+
+
+
+
+
