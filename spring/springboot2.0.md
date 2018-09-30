@@ -328,6 +328,49 @@
 
 #### 指标
 
+## spring framework 手动装配
+
+### spring 模式注解装配
+
+定义：一种用于声明在应用中扮演组件角色的注解
+
+举例： @Component、@Service、@Configuration
+
+装配：`<context:component-scan>` 或者 `@ComponentScan`
+
+自定义模式注解，本质上是模式注解 根据注解的派生性 
+
+就是在自定义注解打上 @Component、@Service、@Configuration 等模式注解
+
+### 自定义@Enable 模块注解装配
+
+#### 注解方式
+
+1. 创建一个自定义注解，仿照一个 `@Enable` 模块注解编写
+
+2. 改写 `@Import` 的类，这个必须是模式注解的类，或者实现了`ImportSelector`  的接口
+
+3. 注解就是使用 `@Configuration` 这个模式注解
+
+#### 编程方式
+
+1. 创建一个自定义注解，仿照一个 `@Enable` 模块注解编写
+
+2. 改写 `@Import` 的类，这个必须是模式注解的类，或者实现了`ImportSelector`  的接口。，这里使用实现 `ImportSelector` 的自定义接口
+
+### 条件装配
+
+#### 注解方式
+
+1. 注册一个服务 `@Service`
+2. 给服务打上 `@Profile` 
+3. 当springboot 去`getBean()` 的时候，就会根据 `@Profile` 的值来决定是否装配进去。而 `@Profile `本质就是根据 `@Conditional` 指定的  ProfileCondition这个类的   `matches()` 这个方法来判断是否匹配 springboot 的启动参数 `springApplicationBuilder().profile()` ;而这个类本质上是 `Condition` 的派生接口。都是重写 `Condition` 的 `matches()` 方法。 
+
+#### 编程方式
+
+1. 自定义注解，在自定义注解上加入 `@Conditional(class)` 注解，指定条件类 ，这个条件类必须实现 `Condition` 接口及其派生接口。
+2. 当springboot 应用 使用自定义注解的值符合预期的值，则装配成功，否则失败。成功与否是靠条件类的 `matches()` 方法
+
 
 
 
