@@ -84,7 +84,7 @@ curl -X<VERB> '<PROTOCOL>://<HOST>:<PORT>/<PATH>?<QUERY_STRING>' -d '<BODY>'
    curl -H "Content-Type: application/json" -XGET 'http://localhost:9200/_count?pretty' -d '{"query": {"match_all": {}}}'
    ```
 
-2. 创建员工目录,创建三个员工
+2. 指定id创建文档，创建员工目录,创建三个员工
 
    ```bash
    //创建员工1
@@ -108,6 +108,37 @@ curl -X<VERB> '<PROTOCOL>://<HOST>:<PORT>/<PATH>?<QUERY_STRING>' -d '<BODY>'
    }'
    ```
 
+3. 不指定id 创建 文档
+
+   ```bash
+   curl -H "Content-Type: application/json" -XPOST 'http://localhost:9200/megacorp/employee' -d '{"first_name":"su","last_name":"su","age":25,"about":"I love to go rock climbing","interests":["sports","music"]}'
+   ```
+
+4. 查询指定id文档
+
+   ```bash
+    
+   ```
+
+5. 创建索引
+
+   ```bash
+   curl -H "Content-Type: application/json" -XPUT 'http://localhost:9200/test_index' 
+   ```
+
+6. 查看索引
+
+   ```bash
+   curl -H "Content-Type: application/json" -XGET 'http://localhost:9200/_cat/indices' 
+   ```
+
+7. 删除索引
+
+   ```bash
+   curl -H "Content-Type: application/json" -XDELETE  'http://localhost:9200/test_index' 
+   ```
+
+
 ### 检索文档
 
 1. 检索单个员工的信息
@@ -117,6 +148,13 @@ curl -X<VERB> '<PROTOCOL>://<HOST>:<PORT>/<PATH>?<QUERY_STRING>' -d '<BODY>'
    curl -H "Content-Type: application/json" -XGET 'http://localhost:9200/megacorp/employee/1'
    
    ```
+
+2. 使用 _search 查询文档
+
+   ```bash
+   curl -H "Content-Type: application/json" -XGET 'http://localhost:9200/_search'
+   ```
+
 
 
 ## 参考文献
