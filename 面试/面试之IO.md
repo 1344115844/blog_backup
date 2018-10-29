@@ -37,3 +37,4 @@ InputStream 为字节输入流，它本身为一个抽象类，必须依靠其�
    是，就使用转换流，从Stream转化为Reader、Writer：InputStreamReader，OutputStreamWriter
 2. 是否需要缓冲提高效率
    是就加上Buffered：BufferedInputStream, BufferedOuputStream, BufferedReader, BufferedWriter
+
