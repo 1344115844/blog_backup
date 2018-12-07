@@ -1,0 +1,18 @@
+<!ENTITY dialog.title "Éditer le serveur proxy">
+<!ENTITY name.label "Donner un nom :">
+<!ENTITY host.label "Hôte proxy :">
+<!ENTITY port.label "Port :">
+<!ENTITY http.label "HTTP">
+<!ENTITY socks4.label "SOCKS v4">
+<!ENTITY socks5.label "SOCKS v5">
+<!ENTITY remotedns.label "Remote DNS">
+<!ENTITY delete.label "Supprimer">
+<!ENTITY addButton.label "Ajout de proxy">
+<!ENTITY addButton.accesskey "A">
+<!ENTITY delButton.label "Suppression de proxy">
+<!ENTITY delButton.accesskey "S">
+<!ENTITY resetButton.label "Réinitialiser">
+<!ENTITY resetButton.accesskey "R">
+<!ENTITY warning.text "Attention : vous avez choisi de supprimer tous les proxys, merci de penser à en ajouter un nouveau, sinon AutoProxy ne fonctionnera pas.">
+<!ENTITY note.text "À noter : vous avez choisi de supprimer le proxy par défaut, merci de penser à en choisir un autre (par le menu « Choix du serveur proxy ») ou AutoProxy pourrait ne pas fonctionner.">
+<!ENTITY tip.text "Astuce : cliquer sur le bouton « Annuler » permet de supprimer la dernière opération.">

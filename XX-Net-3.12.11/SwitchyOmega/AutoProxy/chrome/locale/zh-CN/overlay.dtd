@@ -1,0 +1,22 @@
+<!ENTITY status.tooltip "状态：">
+<!ENTITY defaultProxy.tooltip "默认代理：">
+<!ENTITY blocked.tooltip "本页已使用代理的项目：">
+<!ENTITY filters.tooltip "最活跃的代理规则：">
+<!ENTITY menuitem.label "AutoProxy 首选项">
+<!ENTITY menuitem.accesskey "B">
+<!ENTITY toolbarbutton.label "AutoProxy">
+<!ENTITY view.blockableItems.label "AutoProxy：可代理资源">
+<!ENTITY context.image.label "代理该图片">
+<!ENTITY context.object.label "代理该对象">
+<!ENTITY context.frame.label "代理该帧">
+<!ENTITY sidebar.title "当前页面可代理的资源">
+<!ENTITY settings.label "首选项">
+<!ENTITY settings.accesskey "P">
+<!ENTITY report.label "向 gfwList 报告问题">
+<!ENTITY report.accesskey "R">
+<!ENTITY opensidebar.label "可代理资源列表">
+<!-- Note: This access key should usually be the same as closesidebar.accesskey. It is the same menu item with different label depending on whether the sidebar is currently open.-->
+<!ENTITY opensidebar.accesskey "V">
+<!ENTITY closesidebar.label "关闭可代理资源列表">
+<!-- Note: This access key should usually be the same as opensidebar.accesskey. It is the same menu item with different label depending on whether the sidebar is currently open.-->
+<!ENTITY closesidebar.accesskey "V">

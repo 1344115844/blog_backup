@@ -1,0 +1,101 @@
+<!ENTITY dialog.title "Preferências do AutoProxy">
+<!ENTITY filters.label "Regra do Proxy">
+<!ENTITY filters.accesskey "R">
+<!ENTITY add.label "Add proxy rule">
+<!ENTITY add.accesskey "A">
+<!ENTITY addRuleGroup.label "Adicionar grupo de regras">
+<!ENTITY addRuleGroup.accesskey "G">
+<!ENTITY addsubscription.label "Acrescentar assinatura de regra">
+<!ENTITY addsubscription.accesskey "S">
+<!ENTITY synchsubscriptions.label "Atualizar todas as assinaturas">
+<!ENTITY synchsubscriptions.accesskey "D">
+<!ENTITY import.label "Importar regras">
+<!ENTITY import.accesskey "M">
+<!ENTITY export.label "Exportar regras padrão">
+<!ENTITY export.accesskey "X">
+<!ENTITY clearall.label "Remover todas regras padrão">
+<!ENTITY clearall.accesskey "L">
+<!ENTITY resethitcounts.label "Zerar estatísticas de hits">
+<!ENTITY resethitcounts.accesskey "R">
+<!ENTITY proxies.label "Servidor proxy">
+<!ENTITY proxies.accesskey "S">
+<!ENTITY editproxies.label "Editar servidor proxy">
+<!ENTITY editproxies.accesskey "E">
+<!ENTITY chooseproxies.label "Choose proxy server">
+<!ENTITY chooseproxies.accesskey "C">
+<!ENTITY edit.label "Editar">
+<!ENTITY edit.accesskey "E">
+<!ENTITY cut.label "Recortar">
+<!ENTITY cut.accesskey "T">
+<!ENTITY copy.label "Copiar">
+<!ENTITY copy.accesskey "C">
+<!ENTITY paste.label "Colar">
+<!ENTITY paste.accesskey "P">
+<!ENTITY remove.label "Apagar">
+<!ENTITY remove.accesskey "D">
+<!ENTITY menu.find.label "Buscar">
+<!ENTITY menu.find.accesskey "F">
+<!ENTITY menu.findagain.label "Buscar de novo">
+<!ENTITY menu.findagain.accesskey "G">
+<!ENTITY view.label "Exibir">
+<!ENTITY view.accesskey "V">
+<!ENTITY sort.label "Organizar">
+<!ENTITY sort.accesskey "S">
+<!ENTITY sort.none.label "Aleatório">
+<!ENTITY sort.none.accesskey "U">
+<!ENTITY sort.ascending.label "Organizar de A &gt; Z">
+<!ENTITY sort.ascending.accesskey "A">
+<!ENTITY sort.descending.label "Organizar de Z &gt; A">
+<!ENTITY sort.descending.accesskey "Z">
+<!ENTITY options.label "Opções">
+<!ENTITY options.accesskey "O">
+<!ENTITY mode.auto.label "Automatic Mode">
+<!ENTITY mode.auto.accesskey "A">
+<!ENTITY mode.global.label "Global Mode">
+<!ENTITY mode.global.accesskey "G">
+<!ENTITY mode.disabled.label "Disable Proxy">
+<!ENTITY mode.disabled.accesskey "D">
+<!ENTITY showintoolbar.label "Exibir na barra de ferramentas">
+<!ENTITY showintoolbar.accesskey "B">
+<!ENTITY showinstatusbar.label "Exibir na barra de status">
+<!ENTITY showinstatusbar.accesskey "S">
+<!ENTITY help.label "Ajuda">
+<!ENTITY help.accesskey "H">
+<!ENTITY gettingStarted.label "Iniciando">
+<!ENTITY gettingStarted.accesskey "s">
+<!ENTITY faq.label "Perguntas Frequentes">
+<!ENTITY faq.accesskey "F">
+<!ENTITY filterdoc.label "Gravando regras do AutoProxy">
+<!ENTITY filterdoc.accesskey "R">
+<!ENTITY about.label "Sobre o AutoProxy">
+<!ENTITY about.accesskey "B">
+<!ENTITY description "As seguintes regras determinam que endereços podem ser filtrados pelo proxy e quais não podem:">
+<!ENTITY filter.column "Regras">
+<!ENTITY filter.accesskey "F">
+<!ENTITY slow.column "Slow filters">
+<!ENTITY slow.accesskey "w">
+<!ENTITY enabled.column "Ativado">
+<!ENTITY enabled.accesskey "n">
+<!ENTITY hitcount.column "Hits">
+<!ENTITY hitcount.accesskey "H">
+<!ENTITY lasthit.column "Último hit">
+<!ENTITY lasthit.accesskey "L">
+<!ENTITY context.edit.label "Editar regra">
+<!ENTITY context.resethitcount.label "Zerar as estatísticas de hit para regras">
+<!ENTITY context.synchsubscription.label "Atualizar assinatura agora">
+<!ENTITY context.editsubscription.label "Edit rule group">
+<!ENTITY context.moveup.label "Mover regra para cima">
+<!ENTITY context.movedown.label "Mover regra para baixo">
+<!ENTITY context.movegroupup.label "Mover grupo para cima">
+<!ENTITY context.movegroupdown.label "Mover grupo para baixo">
+<!ENTITY context.enable.label "Ativar">
+<!ENTITY context.disable.label "Desativar">
+<!ENTITY apply.label "Aplicar">
+<!ENTITY apply.accesskey "P">
+<!ENTITY changeClickBehaviour.label "When click on icon:">
+<!ENTITY changeClickBehaviour_context "Context menu">
+<!ENTITY changeClickBehaviour_proxyMenu "Proxy menu">
+<!ENTITY changeClickBehaviour_cycleProxy "Cycle default proxy">
+<!ENTITY changeClickBehaviour_proxyMode "Cycle proxy mode">
+<!ENTITY changeClickBehaviour_preference "Preference">
+<!ENTITY changeClickBehaviour_proxyable "Proxyable items">
