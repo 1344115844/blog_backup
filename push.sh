@@ -1,1 +1,0 @@
-git config core.autocrlf false && git add . -A && git commit -m "push at %date% %time%" && git push origin master
