@@ -1,0 +1,8 @@
+modules:
+  gae_proxy: {auto_start: 1}
+  launcher: {allow_remote_connect: 0, control_port: 8085, last_run_version: 3.12.11,
+    proxy: disable}
+  smart_router: {auto_start: 1}
+  x_tunnel: {auto_start: 1}
+update: {last_path: 'C:\Users\admin\Desktop\blog_backup\XX-Net-3.12.11\code\default\launcher',
+  postUpdateStat: noChange, uuid: e34e3522-1cc5-4d67-a466-e1426f6a2ec3}
