@@ -1,1 +1,2 @@
-git add . &&git commit -m  "auto deploy %date% %time%" &&git push origin master
+time=$(date "+%Y-%m-%d %H:%M:%S");
+git add . &&git commit -m  "auto deploy ${time}" &&git push origin master
