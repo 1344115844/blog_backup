@@ -1,4 +1,3 @@
-time=$(date "+%Y-%m-%d %H:%M:%S")
-git add .
-git commit -m  "auto deploy ${time}" 
+git add /home/suveng/blog_backup/
+git commit -m "deploy"
 git push origin master
