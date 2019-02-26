@@ -3,5 +3,5 @@ git config core.autocrlf false
 git pull origin master 
 git add . -A
 git commit -m "deploy at ${time}"
-git push origin source 
+git push --force origin source 
 git push --force github master
