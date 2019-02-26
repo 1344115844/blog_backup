@@ -4,4 +4,3 @@ git pull origin master
 git add . -A
 git commit -m "deploy at ${time}"
 git push origin master 
-git push --force github master
