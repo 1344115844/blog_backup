@@ -11,7 +11,7 @@
  - 苏文广/男/1996 
  - 本科/韩山师范学院计算机系 
  - 工作年限：1年
- - 技术博客：[https://suveng.github.io/blog](https://suveng.github.io/blog)
+ - 技术博客：[https://suveng.github.io/blog](https://suveng.github.io/blog/tag.html)
  - Github：[http://github.com/suveng](http://github.com/suveng)
  - 期望职位：Java开发工程师
 
@@ -51,7 +51,13 @@
 - 版本管理、文档和自动化部署工具：Svn/Git/Maven/TravisCI/Jenkins/Docker
 - 单元测试：Junit
 - 云和开放平台：旷视科技FaceID/微信小程序/腾讯云
----      
+
+# 自我评价
+有事业心与责任心，工作积极认真，新项目上手很快。
+对新事物有很强的好奇心，喜欢做有挑战的事情。
+
+为人踏实，善于沟通，具有很强的团队意识和协作能力。
+---
 # 致谢
 感谢您花时间阅读我的简历，期待能有机会和您共事。
       
