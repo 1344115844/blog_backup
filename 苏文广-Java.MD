@@ -45,7 +45,8 @@
 
 - Web开发：Java
 - Web框架：SpringMVC/SpirngBoot/SpringCloud/JBoot/Mybatis/JPA
-- 中间件：kafka/RabbitMQ/zookeeper/flume
+- 中间件：kafka/RabbitMQ/ZooKeeper/Flume
+- 服务器容器：Tomcat/Resin
 - 前端框架：Vue.js/Bootstrap/JQuery
 - 数据库相关：MySQL/Redis/MongoDB/ElasticSearch
 - 版本管理、文档和自动化部署工具：Svn/Git/Maven/TravisCI/Jenkins/Docker
@@ -55,9 +56,7 @@
 # 自我评价
 有事业心与责任心，工作积极认真，新项目上手很快。
 对新事物有很强的好奇心，喜欢做有挑战的事情。
-
 为人踏实，善于沟通，具有很强的团队意识和协作能力。
----
 # 致谢
 感谢您花时间阅读我的简历，期待能有机会和您共事。
       
